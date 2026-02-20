@@ -12,21 +12,18 @@ export default function ProductsPage() {
   const dispatch = useDispatch<AppDispatch>();
   const [searchParams] = useSearchParams();
 
-  // /products?q=...
   const q = (searchParams.get("q") || "").toLowerCase().trim();
 
-  // ✅ Get whole slice safely
   const productsState = useSelector((state: RootState) => state.products);
 
-  // ✅ fallback: some slices use items instead of products
+  // support both shapes: productsSlice may use "products" or "items"
   const products =
     (productsState as any).products ?? (productsState as any).items ?? [];
 
-  // ✅ fallback: some slices use status instead of loading
+  // support both shapes: "loading" boolean or "status" string
   const loading =
     (productsState as any).loading ??
-    ((productsState as any).status === "loading") ??
-    false;
+    ((productsState as any).status === "loading");
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -49,24 +46,20 @@ export default function ProductsPage() {
             <ProductSkeleton key={idx} />
           ))}
         </div>
+      ) : filteredProducts.length === 0 ? (
+        <p className="text-gray-600">No products found.</p>
       ) : (
-        <>
-          {filteredProducts.length === 0 ? (
-            <p className="text-gray-600">No products found.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {filteredProducts.map((p: any) => (
-                <ProductCard
-                  key={p.id}
-                  id={p.id}
-                  title={p.title}
-                  price={p.price}
-                  image={p.image}
-                />
-              ))}
-            </div>
-          )}
-        </>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {filteredProducts.map((p: any) => (
+            <ProductCard
+              key={p.id}
+              id={p.id}
+              title={p.title}
+              price={p.price}
+              image={p.image}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

@@ -1,51 +1,81 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../store/store";
+import { clearOrders } from "../features/orders/ordersSlice";
 
 export default function OrdersPage() {
+  const dispatch = useDispatch();
+
   const orders = useSelector((state: RootState) => state.orders.orders);
 
   if (orders.length === 0) {
-    return <div className="p-10 text-xl">No orders yet 📦</div>;
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold">My Orders</h1>
+        <p className="mt-4 text-gray-600">No orders yet.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-6">My Orders 📦</h1>
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">My Orders</h1>
+        <button
+          className="bg-red-600 text-white px-4 py-2 rounded-lg"
+          onClick={() => dispatch(clearOrders())}
+        >
+          Clear Orders
+        </button>
+      </div>
 
-      <div className="space-y-6">
-        {orders.map((o) => (
-          <div key={o.orderId} className="border rounded-xl p-6 bg-white">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="font-bold">Order ID: {o.orderId}</div>
-              <div className="text-gray-600">
-                {new Date(o.createdAt).toLocaleString()}
+      <div className="mt-6 space-y-4">
+        {orders.map((order) => (
+          <div key={order.id} className="border rounded-xl p-4">
+            <div className="flex justify-between flex-wrap gap-2">
+              <p className="font-semibold">Order ID: {order.id}</p>
+              <p className="text-gray-600">{order.createdAt}</p>
+            </div>
+
+            <p className="mt-2">
+              <b>Total:</b> ₹{order.total}
+            </p>
+
+            <p className="text-gray-700 mt-1">
+              <b>Payment:</b> {order.paymentMethod}
+            </p>
+
+            <div className="mt-3">
+              <p className="font-semibold mb-2">Items:</p>
+              <div className="space-y-2">
+                {order.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 border rounded-lg p-2"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-14 h-14 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-gray-600 text-sm">
+                        ₹{item.price} × {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="mt-3 text-gray-700">
-              Shipping to:{" "}
-              <span className="font-semibold">
-                {o.shipping.fullName}, {o.shipping.city} - {o.shipping.pincode}
-              </span>
+            <div className="mt-3 text-sm text-gray-700">
+              <p className="font-semibold">Shipping</p>
+              <p>{order.shipping.name} — {order.shipping.phone}</p>
+              <p>
+                {order.shipping.address}, {order.shipping.city} -{" "}
+                {order.shipping.pincode}
+              </p>
             </div>
-
-            <div className="mt-4 space-y-3">
-              {o.items.map((i) => (
-                <div key={i.id} className="flex items-center gap-4 border rounded-lg p-3">
-                  <img src={i.image} alt={i.title} className="h-12 w-12 object-cover rounded" />
-                  <div className="flex-1">
-                    <div className="font-semibold line-clamp-1">{i.title}</div>
-                    <div className="text-gray-600">
-                      ₹{i.price} × {i.quantity}
-                    </div>
-                  </div>
-                  <div className="font-bold">₹{i.price * i.quantity}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 text-lg font-bold">Total: ₹{o.total}</div>
-            <div className="text-gray-600">Payment: {o.paymentMethod}</div>
           </div>
         ))}
       </div>

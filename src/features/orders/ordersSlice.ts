@@ -10,18 +10,18 @@ export type OrderItem = {
 };
 
 export type Order = {
-  orderId: string;
+  id: string;
   createdAt: string;
   items: OrderItem[];
   total: number;
   shipping: {
-    fullName: string;
+    name: string;
     phone: string;
     address: string;
     city: string;
     pincode: string;
   };
-  paymentMethod: "COD";
+  paymentMethod: string;
 };
 
 type OrdersState = {
@@ -32,21 +32,12 @@ const initialState: OrdersState = loadState<OrdersState>("orders", {
   orders: [],
 });
 
-function makeOrderId() {
-  return "OD" + Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 const ordersSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    placeOrder: (state, action: { payload: Omit<Order, "orderId" | "createdAt"> }) => {
-      const newOrder: Order = {
-        orderId: makeOrderId(),
-        createdAt: new Date().toISOString(),
-        ...action.payload,
-      };
-      state.orders.unshift(newOrder);
+    addOrder: (state, action: { payload: Order }) => {
+      state.orders.unshift(action.payload);
     },
     clearOrders: (state) => {
       state.orders = [];
@@ -54,5 +45,5 @@ const ordersSlice = createSlice({
   },
 });
 
-export const { placeOrder, clearOrders } = ordersSlice.actions;
+export const { addOrder, clearOrders } = ordersSlice.actions;
 export default ordersSlice.reducer;
